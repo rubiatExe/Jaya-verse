@@ -31,11 +31,10 @@ export async function getRandomReason(): Promise<GetRandomReasonOutput> {
 
 export async function addReason(data: {reason: string}): Promise<void> {
     try {
-        const reasonData: AddReasonData = {
+        await addReasonToDb({
             reason: data.reason,
             from: 'a friend'
-        };
-        await addReasonToDb(reasonData);
+        });
     } catch (error) {
         console.error('Error in addReason server action:', error);
         throw new Error("Could not add reason.");

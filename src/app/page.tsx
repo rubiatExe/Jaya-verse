@@ -87,7 +87,7 @@ export default function Home() {
   
   const onReasonSubmit = async (data: z.infer<typeof reasonSchema>) => {
     try {
-      await addReason(data.reason);
+      await addReason(data);
       toast({
         title: "Reason Submitted!",
         description: "Thank you for sharing your love for Jaya.",

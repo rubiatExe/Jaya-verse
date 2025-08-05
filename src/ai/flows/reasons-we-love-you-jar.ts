@@ -10,24 +10,74 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
+// This is a stand-in for a database to store reasons.
+// In a real application, you would use a proper database like Firestore.
+const userSubmittedReasons: string[] = [];
+
+
 const GetRandomReasonOutputSchema = z.object({
   reason: z.string().describe('A randomly selected reason why Jaya is loved.'),
 });
 
 export type GetRandomReasonOutput = z.infer<typeof GetRandomReasonOutputSchema>;
 
-async function getRandomReasonFlow(): Promise<GetRandomReasonOutput> {
-  return ai.generate({
-    prompt: `You are a helpful assistant. Return a random reason why Jaya is loved from the following list:\n- She is kind\n- She is smart\n- She is beautiful\n- She is funny\n- She is a good friend\n- She is a good daughter\n- She is a good sister`,
-    model: 'googleai/gemini-2.0-flash',
-    config: {
-      outputSchema: GetRandomReasonOutputSchema,
+const AddReasonInputSchema = z.object({
+    reason: z.string().describe('A new reason why Jaya is loved.'),
+});
+
+export type AddReasonInput = z.infer<typeof AddReasonInputSchema>;
+
+
+const baseReasons = [
+    "She is kind",
+    "She is smart",
+    "She is beautiful",
+    "She is funny",
+    "She is a good friend",
+    "She is a good daughter",
+    "She is a good sister"
+];
+
+const getRandomReasonFlow = ai.defineFlow(
+    {
+        name: "getRandomReasonFlow",
+        outputSchema: GetRandomReasonOutputSchema
     },
-  }).then(result => {
-    return {reason: result.text!};
-  });
-}
+    async () => {
+        const allReasons = [...baseReasons, ...userSubmittedReasons];
+        
+        const response = await ai.generate({
+            prompt: `You are a helpful assistant. From the following list of reasons, select one at random and return it.
+
+            List of reasons:
+            ${allReasons.map(r => `- ${r}`).join('\n')}
+            
+            Return only the text of the reason.`,
+            model: 'googleai/gemini-2.0-flash',
+        });
+
+        return { reason: response.text! };
+    }
+);
+
 
 export async function getRandomReason(): Promise<GetRandomReasonOutput> {
-  return getRandomReasonFlow();
+  return await getRandomReasonFlow();
+}
+
+
+const addReasonFlow = ai.defineFlow(
+    {
+        name: "addReasonFlow",
+        inputSchema: AddReasonInputSchema,
+    },
+    async ({ reason }) => {
+        console.log(`New reason added: ${reason}`);
+        userSubmittedReasons.push(reason);
+        // In a real app, you would save this to a database.
+    }
+);
+
+export async function addReason(reason: string): Promise<void> {
+    await addReasonFlow({ reason });
 }

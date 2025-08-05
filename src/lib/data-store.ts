@@ -21,9 +21,7 @@ export interface Letter {
   createdAt?: Date;
 }
 
-export interface AddLetterData extends Omit<Letter, 'id' | 'createdAt' | 'mood'> {
-    mood: 'sad' | 'laugh' | 'stressed';
-}
+export interface AddLetterData extends Omit<Letter, 'id' | 'createdAt'> {}
 
 export interface Friend {
   id?: string;
@@ -69,7 +67,7 @@ function createRealtimeHook<T>(collectionName: string, orderField: string = 'cre
       });
 
       return () => unsubscribe();
-    }, [collectionName, orderField, lim]);
+    }, []);
 
     return data;
   }
@@ -154,12 +152,11 @@ export async function addFriend(newFriend: AddFriendData) {
     const top = `${Math.random() * 60 + 20}%`;
     const left = `${Math.random() * 80 + 10}%`;
 
-    const friend: Omit<Friend, 'id'> = {
+    const friend: Omit<Friend, 'id' | 'createdAt'> = {
         ...newFriend,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'}),
         avatar: `https://placehold.co/100x100.png?text=${newFriend.name.charAt(0)}`,
         coords: { top, left },
-        createdAt: new Date(),
     }
      await addDoc(collection(db, 'friends'), {
       ...friend,

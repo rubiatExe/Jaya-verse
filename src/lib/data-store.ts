@@ -122,7 +122,7 @@ export async function updateWater(glasses: number) {
     }
 }
 
-export async function addReason(reason: string) {
+export async function addReasonToDb(reason: string) {
   try {
     await addDoc(collection(db, 'reasons'), {
       reason,
@@ -135,7 +135,7 @@ export async function addReason(reason: string) {
   }
 }
 
-export async function addLetter(newLetter: AddLetterData) {
+export async function addLetterToDb(newLetter: AddLetterData) {
   try {
     await addDoc(collection(db, 'letters'), {
         ...newLetter,
@@ -147,7 +147,7 @@ export async function addLetter(newLetter: AddLetterData) {
   }
 }
 
-export async function addFriend(newFriend: AddFriendData) {
+export async function addFriendToDb(newFriend: AddFriendData) {
   try {
     const top = `${Math.random() * 60 + 20}%`;
     const left = `${Math.random() * 80 + 10}%`;

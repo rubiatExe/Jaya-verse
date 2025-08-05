@@ -2,7 +2,7 @@
 
 import { getRandomReason as getRandomReasonFromFlow } from '@/ai/flows/reasons-we-love-you-jar';
 import type { GetRandomReasonOutput } from '@/ai/flows/reasons-we-love-you-jar';
-import { addFriend as addFriendToDb, addLetter as addLetterToDb, addReason as addReasonToDb, type AddFriendData, type AddLetterData } from '@/lib/data-store';
+import { addFriendToDb, addLetterToDb, addReasonToDb, type AddFriendData, type AddLetterData } from '@/lib/data-store';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 

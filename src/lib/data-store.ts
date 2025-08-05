@@ -18,8 +18,10 @@ export interface AddReasonData {
     from: string;
 }
 
-export interface DisplayReason extends Omit<Reason, 'createdAt'> {
+export interface DisplayReason {
     id: string;
+    reason: string;
+    from: string;
     createdAt: Date;
 }
 

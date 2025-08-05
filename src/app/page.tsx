@@ -3,8 +3,9 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Heart } from 'lucide-react';
+import { Heart, MessageSquare, Droplet, Send, Gift, MapPin } from 'lucide-react';
 import { LifeRpg } from '@/components/life-rpg';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 
 export default function Home() {
@@ -29,6 +30,49 @@ export default function Home() {
         <div className="mt-8 w-full flex justify-center">
             <LifeRpg isInteractive={false} />
         </div>
+
+        <Card className="mt-12 w-full max-w-4xl text-left">
+          <CardHeader>
+            <CardTitle className="font-headline text-2xl">Ways to Share Your Love</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+              <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                  <MessageSquare className="w-6 h-6 text-primary flex-shrink-0 mt-1"/>
+                  <div>
+                      <h3 className="font-semibold">Recent Love Feed</h3>
+                      <p className="text-sm text-muted-foreground">A live-updating feed that shows the last few messages and reasons left by friends and family.</p>
+                  </div>
+              </div>
+               <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                  <Droplet className="w-6 h-6 text-primary flex-shrink-0 mt-1"/>
+                  <div>
+                      <h3 className="font-semibold">Public Water Status</h3>
+                      <p className="text-sm text-muted-foreground">View Jaya's daily water intake progress.</p>
+                  </div>
+              </div>
+               <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                  <Send className="w-6 h-6 text-primary flex-shrink-0 mt-1"/>
+                  <div>
+                      <h3 className="font-semibold">Leave a Public Note</h3>
+                      <p className="text-sm text-muted-foreground">Leave a personal note for one of the "Open When..." letter categories.</p>
+                  </div>
+              </div>
+               <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                  <Gift className="w-6 h-6 text-primary flex-shrink-0 mt-1"/>
+                  <div>
+                      <h3 className="font-semibold">Share a Reason (Public)</h3>
+                      <p className="text-sm text-muted-foreground">Share a reason they love Jaya.</p>
+                  </div>
+              </div>
+               <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                  <MapPin className="w-6 h-6 text-primary flex-shrink-0 mt-1"/>
+                  <div>
+                      <h3 className="font-semibold">Add Pin to Public Map</h3>
+                      <p className="text-sm text-muted-foreground">Add their location to the interactive friend map.</p>
+                  </div>
+              </div>
+          </CardContent>
+        </Card>
       </main>
 
       <footer className="text-center p-6 text-sm text-muted-foreground">

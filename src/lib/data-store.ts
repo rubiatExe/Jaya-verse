@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { db } from './firebase';
 import { collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, limit, doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import type { ActivityKey } from '@/components/life-rpg';
 
 // ========= TYPES =========
 
@@ -52,6 +53,11 @@ export interface WaterStatus {
     currentGlasses: number;
     goalGlasses: number;
     date: string; // YYYY-MM-DD
+}
+
+export interface LifeRpgStatus {
+    activity: ActivityKey;
+    details: Record<ActivityKey, string>;
 }
 
 
@@ -117,6 +123,33 @@ export function useWaterStatus() {
     return status;
 }
 
+export function useLifeRpgStatus() {
+    const [status, setStatus] = useState<LifeRpgStatus | null>(null);
+    const docId = "main"; // Using a single document for the status
+
+    useEffect(() => {
+        const docRef = doc(db, 'lifeRpg', docId);
+        const unsubscribe = onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                setStatus(docSnap.data() as LifeRpgStatus);
+            } else {
+                const defaultStatus: LifeRpgStatus = {
+                    activity: 'idle',
+                    details: { idle: '', reading: '', sleeping: '', tv: '', eating: '', travel: '', creating: '' }
+                };
+                setDoc(docRef, defaultStatus);
+                setStatus(defaultStatus);
+            }
+        }, (error) => {
+            console.error("Error fetching Life RPG status:", error);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    return status;
+}
+
 export const useReasons = createRealtimeHook<Reason>('reasons');
 export const useRecentReasons = createRealtimeHook<DisplayReason>('reasons', 'createdAt', 2);
 export const useLetters = createRealtimeHook<Letter>('letters');
@@ -124,6 +157,20 @@ export const useFriends = createRealtimeHook<Friend>('friends');
 
 
 // ========= ACTIONS (writing to Firestore) =========
+
+export async function updateLifeRpgStatus(newStatus: Partial<LifeRpgStatus>) {
+    const docRef = doc(db, 'lifeRpg', "main");
+    try {
+        await updateDoc(docRef, newStatus);
+    } catch (error) {
+        if ((error as any).code === 'not-found') {
+            await setDoc(docRef, newStatus, { merge: true });
+        } else {
+            console.error("Error updating Life RPG status: ", error);
+            throw new Error("Could not update Life RPG status.");
+        }
+    }
+}
 
 export async function updateWater(glasses: number) {
     const today = new Date().toISOString().split('T')[0];

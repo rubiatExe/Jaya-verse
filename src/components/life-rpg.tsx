@@ -78,7 +78,17 @@ export function LifeRpg({ isInteractive }: LifeRpgProps) {
     setEditInput('');
   };
   
-  const handleModalClose = () => {
+  const handleSaveWithoutDetails = async () => {
+    if (!editingActivity) return;
+    
+    const newStatus: Partial<LifeRpgStatus> = {
+        activity: editingActivity,
+        details: {
+            ...status.details,
+            [editingActivity]: '', // Save with empty details
+        }
+    };
+    await updateLifeRpgStatus(newStatus);
     setIsEditing(false);
     setEditingActivity(null);
     setEditInput('');
@@ -133,12 +143,12 @@ export function LifeRpg({ isInteractive }: LifeRpgProps) {
             )}
       </div>
 
-      <Dialog open={isEditing} onOpenChange={handleModalClose}>
-        <DialogContent onEscapeKeyDown={handleModalClose} className="font-sans">
+      <Dialog open={isEditing} onOpenChange={(isOpen) => !isOpen && setIsEditing(false)}>
+        <DialogContent onEscapeKeyDown={() => setIsEditing(false)} className="font-sans">
           <DialogHeader>
             <DialogTitle className="capitalize font-headline text-2xl">What about: {editingActivity}?</DialogTitle>
             <DialogDescription>
-              Add some specific details. What are you reading/watching/eating?
+              Add specific details, or just save the activity as is.
             </DialogDescription>
           </DialogHeader>
           <Input 
@@ -149,8 +159,8 @@ export function LifeRpg({ isInteractive }: LifeRpgProps) {
             placeholder="e.g., 'The Midnight Library'"
           />
           <DialogFooter>
-            <Button variant="ghost" onClick={handleModalClose}>Skip</Button>
-            <Button onClick={handleDetailSave}>Save</Button>
+            <Button variant="ghost" onClick={handleSaveWithoutDetails}>Save without details</Button>
+            <Button onClick={handleDetailSave}>Save with details</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -213,41 +213,50 @@ export default function Home() {
                           <Form {...noteForm}>
                             <form onSubmit={noteForm.handleSubmit(onNoteSubmit)} className="space-y-4">
                                 <FormField
-                                control={noteForm.control}
-                                name="mood"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Select a mood for the letter" />
-                                        </Trigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="sad">For when you're feeling sad</SelectItem>
-                                        <SelectItem value="laugh">For when you need a laugh</SelectItem>
-                                        <SelectItem value="stressed">For when you're feeling stressed</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}/>
-                               <FormField control={noteForm.control} name="from" render={({ field }) => (
-                                  <FormItem>
+                                  control={noteForm.control}
+                                  name="mood"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select a mood for the letter" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="sad">For when you're feeling sad</SelectItem>
+                                          <SelectItem value="laugh">For when you need a laugh</SelectItem>
+                                          <SelectItem value="stressed">For when you're feeling stressed</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={noteForm.control}
+                                  name="from"
+                                  render={({ field }) => (
+                                    <FormItem>
                                       <Input placeholder="Your name" {...field}/>
                                       <FormMessage />
-                                  </FormItem>
-                              )}/>
-                                <FormField control={noteForm.control} name="message" render={({ field }) => (
-                                  <FormItem>
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={noteForm.control}
+                                  name="message"
+                                  render={({ field }) => (
+                                    <FormItem>
                                       <Textarea placeholder="Write a note of encouragement..." {...field}/>
                                       <FormMessage />
-                                  </FormItem>
-                              )}/>
-                              <Button type="submit" className="w-full" disabled={noteForm.formState.isSubmitting}>
+                                    </FormItem>
+                                  )}
+                                />
+                                <Button type="submit" className="w-full" disabled={noteForm.formState.isSubmitting}>
                                   {noteForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                   Send Note
-                              </Button>
+                                </Button>
                             </form>
                           </Form>
                       </CardContent>
@@ -295,15 +304,36 @@ export default function Home() {
                       <CardContent>
                            <Form {...pinForm}>
                             <form onSubmit={pinForm.handleSubmit(onPinSubmit)} className="space-y-4">
-                              <FormField control={pinForm.control} name="name" render={({ field }) => (
-                                  <FormItem><Input placeholder="Your Name" {...field}/><FormMessage /></FormItem>
-                              )}/>
-                               <FormField control={pinForm.control} name="location" render={({ field }) => (
-                                  <FormItem><Input placeholder="Your Location (e.g., City, Country)" {...field}/><FormMessage /></FormItem>
-                              )}/>
-                              <FormField control={pinForm.control} name="message" render={({ field }) => (
-                                  <FormItem><Textarea placeholder="A short message..." {...field}/><FormMessage /></FormItem>
-                              )}/>
+                              <FormField
+                                control={pinForm.control}
+                                name="name"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <Input placeholder="Your Name" {...field}/>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                               <FormField
+                                 control={pinForm.control}
+                                 name="location"
+                                 render={({ field }) => (
+                                  <FormItem>
+                                    <Input placeholder="Your Location (e.g., City, Country)" {...field}/>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={pinForm.control}
+                                name="message"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <Textarea placeholder="A short message..." {...field}/>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
                               <Button type="submit" className="w-full" disabled={pinForm.formState.isSubmitting}>
                                   {pinForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                   Add Pin
@@ -353,5 +383,5 @@ export default function Home() {
         </DialogContent>
       </Dialog>
     </>
-
-    
+  );
+}

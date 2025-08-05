@@ -51,4 +51,8 @@ export default function OpenWhenPage() {
               </AccordionItem>
             )
           })}
-        
+        </Accordion>
+      </CardContent>
+    </Card>
+  );
+}

@@ -18,7 +18,7 @@ import { addReason, addNoteAction, addPinAction } from '@/app/actions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useRecentReasons } from '@/lib/data-store';
+import { useRecentReasons, useWaterStatus } from '@/lib/data-store';
 
 const reasonSchema = z.object({
   reason: z.string().min(3, "Your reason should be a little longer!").max(100, "That's a beautiful thought! Can you make it a bit more concise?"),
@@ -35,6 +35,30 @@ const pinSchema = z.object({
   location: z.string().min(3, "Please enter a valid location."),
   message: z.string().min(3, "Please leave a short message!").max(50, "Message is too long."),
 });
+
+
+function PublicWaterTracker() {
+  const waterStatus = useWaterStatus();
+
+  if (!waterStatus) {
+    return (
+       <CardContent className="space-y-2">
+          <Progress value={0} className="h-3" />
+          <p className="text-sm text-muted-foreground text-center">Loading water status...</p>
+      </CardContent>
+    );
+  }
+
+  const { currentGlasses, goalGlasses } = waterStatus;
+  const progress = goalGlasses > 0 ? (currentGlasses / goalGlasses) * 100 : 0;
+  
+  return (
+    <CardContent className="space-y-2">
+        <Progress value={progress} className="h-3" />
+        <p className="text-sm text-muted-foreground text-center">Jaya has drunk {currentGlasses}/{goalGlasses} glasses today!</p>
+    </CardContent>
+  );
+}
 
 
 export default function Home() {
@@ -173,10 +197,7 @@ export default function Home() {
                               <CardDescription>View Jaya's daily water intake progress.</CardDescription>
                            </div>
                       </CardHeader>
-                      <CardContent className="space-y-2">
-                          <Progress value={75} className="h-3" />
-                          <p className="text-sm text-muted-foreground text-center">Jaya has drunk 6/8 glasses today!</p>
-                      </CardContent>
+                      <PublicWaterTracker />
                   </Card>
                   
                    <Card>

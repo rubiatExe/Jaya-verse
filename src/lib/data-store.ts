@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { db } from './firebase';
-import { collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, limit, doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
 
 // ========= TYPES =========
 
@@ -38,6 +38,12 @@ export interface Friend {
 
 export interface AddFriendData extends Omit<Friend, 'id' | 'time' | 'avatar' | 'coords' | 'createdAt'> {}
 
+export interface WaterStatus {
+    currentGlasses: number;
+    goalGlasses: number;
+    date: string; // YYYY-MM-DD
+}
+
 
 // ========= HOOKS for real-time data =========
 
@@ -47,10 +53,11 @@ function createRealtimeHook<T>(collectionName: string, orderField: string = 'cre
 
     useEffect(() => {
       let q;
+      const coll = collection(db, collectionName);
       if (lim) {
-         q = query(collection(db, collectionName), orderBy(orderField, 'desc'), limit(lim));
+         q = query(coll, orderBy(orderField, 'desc'), limit(lim));
       } else {
-         q = query(collection(db, collectionName), orderBy(orderField, 'desc'));
+         q = query(coll, orderBy(orderField, 'desc'));
       }
       
 
@@ -59,7 +66,6 @@ function createRealtimeHook<T>(collectionName: string, orderField: string = 'cre
         setData(docs);
       }, (error) => {
         console.error(`Error fetching ${collectionName}:`, error);
-        // Optionally, set an error state here
       });
 
       return () => unsubscribe();
@@ -69,6 +75,31 @@ function createRealtimeHook<T>(collectionName: string, orderField: string = 'cre
   }
 }
 
+export function useWaterStatus() {
+    const [status, setStatus] = useState<WaterStatus | null>(null);
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+
+    useEffect(() => {
+        const docRef = doc(db, 'waterStatus', today);
+        const unsubscribe = onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                setStatus(docSnap.data() as WaterStatus);
+            } else {
+                // If no document for today, create one
+                const newStatus: WaterStatus = { currentGlasses: 0, goalGlasses: 10, date: today };
+                setDoc(docRef, newStatus);
+                setStatus(newStatus);
+            }
+        }, (error) => {
+            console.error("Error fetching water status:", error);
+        });
+
+        return () => unsubscribe();
+    }, [today]);
+
+    return status;
+}
+
 export const useReasons = createRealtimeHook<Reason>('reasons');
 export const useRecentReasons = createRealtimeHook<Reason>('reasons', 'createdAt', 2);
 export const useLetters = createRealtimeHook<Letter>('letters');
@@ -76,6 +107,22 @@ export const useFriends = createRealtimeHook<Friend>('friends');
 
 
 // ========= ACTIONS (writing to Firestore) =========
+
+export async function updateWater(glasses: number) {
+    const today = new Date().toISOString().split('T')[0];
+    const docRef = doc(db, 'waterStatus', today);
+    try {
+        await updateDoc(docRef, { currentGlasses: glasses });
+    } catch (error) {
+        // If doc doesn't exist, create it.
+        if ((error as any).code === 'not-found') {
+             await setDoc(docRef, { currentGlasses: glasses, goalGlasses: 10, date: today });
+        } else {
+            console.error("Error updating water status: ", error);
+            throw new Error("Could not update water status.");
+        }
+    }
+}
 
 export async function addReason(newReason: Omit<Reason, 'from' | 'id' | 'createdAt'> & { from?: string }) {
   try {
@@ -104,16 +151,15 @@ export async function addLetter(newLetter: AddLetterData) {
 
 export async function addFriend(newFriend: AddFriendData) {
   try {
-    // Generate random coordinates for the map pin
-    const top = `${Math.random() * 60 + 20}%`; // 20% to 80%
-    const left = `${Math.random() * 80 + 10}%`; // 10% to 90%
+    const top = `${Math.random() * 60 + 20}%`;
+    const left = `${Math.random() * 80 + 10}%`;
 
     const friend: Omit<Friend, 'id'> = {
         ...newFriend,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'}),
         avatar: `https://placehold.co/100x100.png?text=${newFriend.name.charAt(0)}`,
         coords: { top, left },
-        createdAt: new Date(), // Using client-side date for simplicity here
+        createdAt: new Date(),
     }
      await addDoc(collection(db, 'friends'), {
       ...friend,

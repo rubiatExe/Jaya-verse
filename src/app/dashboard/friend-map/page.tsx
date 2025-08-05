@@ -21,7 +21,7 @@ export default function FriendMapPage() {
         <CardContent>
             <TooltipProvider>
                 <div className="relative aspect-video w-full rounded-lg overflow-hidden">
-                    <Image src="https://placehold.co/800x450/FDE2F3/4A234E.png" alt="World map with pins" layout="fill" objectFit="cover" data-ai-hint="world map illustration"/>
+                    <Image src="https://placehold.co/800x450/d05e94/ffffff.png" alt="World map with pins" layout="fill" objectFit="cover" data-ai-hint="pink world map"/>
                     {friends.map(friend => (
                         <Tooltip key={friend.name}>
                             <TooltipTrigger asChild>

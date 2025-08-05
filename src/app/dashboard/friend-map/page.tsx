@@ -1,12 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Map, Pin } from "lucide-react";
 import Image from "next/image";
 
 const friends = [
-  { name: 'Alex', location: 'Tokyo, Japan', time: '9:00 PM', message: 'Miss you!', avatar: 'https://placehold.co/100x100/F9A8D4/4A234E.png?text=A' },
-  { name: 'Mom', location: 'New York, USA', time: '8:00 AM', message: 'Call me soon!', avatar: 'https://placehold.co/100x100/E1BEE7/4A234E.png?text=M' },
-  { name: 'Ben', location: 'London, UK', time: '1:00 PM', message: 'Hope you are well!', avatar: 'https://placehold.co/100x100/FDE2F3/4A234E.png?text=B' },
+  { name: 'Alex', location: 'Tokyo, Japan', time: '9:00 PM', message: 'Miss you!', avatar: 'https://placehold.co/100x100/F9A8D4/4A234E.png?text=A', coords: { top: '35%', left: '85%' } },
+  { name: 'Mom', location: 'New York, USA', time: '8:00 AM', message: 'Call me soon!', avatar: 'https://placehold.co/100x100/E1BEE7/4A234E.png?text=M', coords: { top: '30%', left: '25%' } },
+  { name: 'Ben', location: 'London, UK', time: '1:00 PM', message: 'Hope you are well!', avatar: 'https://placehold.co/100x100/FDE2F3/4A234E.png?text=B', coords: { top: '25%', left: '48%' } },
 ];
 
 export default function FriendMapPage() {
@@ -18,10 +19,25 @@ export default function FriendMapPage() {
           <CardDescription>A world map showing pins from all your friends and their lovely messages.</CardDescription>
         </CardHeader>
         <CardContent>
-            <div className="relative aspect-video w-full bg-accent/20 rounded-lg overflow-hidden flex items-center justify-center">
-                 <Image src="https://placehold.co/800x450.png" alt="World map with pins" layout="fill" objectFit="cover" data-ai-hint="world map illustration"/>
-                 <p className="z-10 font-semibold text-accent-foreground p-4 bg-background/80 rounded-md">Interactive Map Coming Soon!</p>
-            </div>
+            <TooltipProvider>
+                <div className="relative aspect-video w-full rounded-lg overflow-hidden">
+                    <Image src="https://placehold.co/800x450/FDE2F3/4A234E.png" alt="World map with pins" layout="fill" objectFit="cover" data-ai-hint="world map illustration"/>
+                    {friends.map(friend => (
+                        <Tooltip key={friend.name}>
+                            <TooltipTrigger asChild>
+                                <div className="absolute transition-transform hover:scale-125" style={{ top: friend.coords.top, left: friend.coords.left }}>
+                                    <Pin className="w-8 h-8 text-primary drop-shadow-lg" fill="hsl(var(--primary))"/>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="font-bold">{friend.name}</p>
+                                <p className="text-sm">{friend.location}</p>
+                                <p className="italic">"{friend.message}"</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    ))}
+                </div>
+            </TooltipProvider>
         </CardContent>
       </Card>
       

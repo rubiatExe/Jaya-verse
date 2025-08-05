@@ -42,10 +42,15 @@ const getRandomReasonFlow = ai.defineFlow(
             prompt: `You are a helpful assistant. From the following list of reasons, select one at random and return it.
 
             List of reasons:
-            ${reasons.map(r => `- ${r}`).join('\n')}
+            {{#each reasons}}
+            - {{{this}}}
+            {{/each}}
             
-            Return only the text of the reason.`,
+            Return only the text of the reason. Do not include the leading dash or any other formatting.`,
             model: 'googleai/gemini-2.0-flash',
+            input: {
+                reasons,
+            }
         });
 
         return { reason: response.text! };

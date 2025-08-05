@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -16,17 +15,20 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { addReason } from '@/app/actions';
+import { addReason, addNoteAction, addPinAction } from '@/app/actions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useReasons } from '@/lib/data-store';
 
 const reasonSchema = z.object({
   reason: z.string().min(3, "Your reason should be a little longer!").max(100, "That's a beautiful thought! Can you make it a bit more concise?"),
 });
 
 const noteSchema = z.object({
-  note: z.string().min(10, "Please write a bit more!").max(200, "Your note is a bit long, please keep it concise!"),
+  message: z.string().min(10, "Please write a bit more!").max(200, "Your note is a bit long, please keep it concise!"),
   from: z.string().min(1, "Please let us know who this is from!"),
+  mood: z.enum(['sad', 'laugh', 'stressed'], { required_error: 'Please select a mood.' }),
 });
 
 const pinSchema = z.object({
@@ -42,6 +44,7 @@ export default function Home() {
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const recentReasons = useReasons().slice(-2);
 
   const reasonForm = useForm<z.infer<typeof reasonSchema>>({
     resolver: zodResolver(reasonSchema),
@@ -50,7 +53,7 @@ export default function Home() {
 
   const noteForm = useForm<z.infer<typeof noteSchema>>({
     resolver: zodResolver(noteSchema),
-    defaultValues: { note: "", from: "" },
+    defaultValues: { message: "", from: "" },
   });
 
   const pinForm = useForm<z.infer<typeof pinSchema>>({
@@ -75,22 +78,38 @@ export default function Home() {
     }
   };
 
-  const onNoteSubmit = (data: z.infer<typeof noteSchema>) => {
-    console.log(data);
-    toast({
-      title: "Note Submitted!",
-      description: "Thank you for leaving a note for Jaya.",
-    });
-    noteForm.reset();
+  const onNoteSubmit = async (data: z.infer<typeof noteSchema>) => {
+    try {
+      await addNoteAction(data);
+      toast({
+        title: "Note Submitted!",
+        description: "Thank you for leaving a note for Jaya.",
+      });
+      noteForm.reset();
+    } catch(error) {
+        toast({
+        variant: "destructive",
+        title: "Oh no!",
+        description: "Something went wrong sending your note.",
+      });
+    }
   };
 
-  const onPinSubmit = (data: z.infer<typeof pinSchema>) => {
-    console.log(data);
-    toast({
-      title: "Pin Added!",
-      description: "Your pin has been added to the map. Thank you!",
-    });
-    pinForm.reset();
+  const onPinSubmit = async (data: z.infer<typeof pinSchema>) => {
+     try {
+      await addPinAction(data);
+      toast({
+        title: "Pin Added!",
+        description: "Your pin has been added to the map. Thank you!",
+      });
+      pinForm.reset();
+    } catch(error) {
+        toast({
+        variant: "destructive",
+        title: "Oh no!",
+        description: "Something went wrong adding your pin.",
+      });
+    }
   };
   
   const handleLogin = () => {
@@ -137,14 +156,13 @@ export default function Home() {
                            </div>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                          <div className="p-3 bg-accent/20 rounded-lg">
-                              <p className="italic">"You're the best!"</p>
-                              <p className="text-right text-sm font-semibold text-primary">- Ben</p>
-                          </div>
-                           <div className="p-3 bg-accent/20 rounded-lg">
-                              <p className="italic">"Thinking of you!"</p>
-                              <p className="text-right text-sm font-semibold text-primary">- Mom</p>
-                          </div>
+                          {recentReasons.map((r, i) => (
+                             <div key={i} className="p-3 bg-accent/20 rounded-lg">
+                                <p className="italic">"{r.reason}"</p>
+                                <p className="text-right text-sm font-semibold text-primary">- {r.from}</p>
+                            </div>
+                          ))}
+                           {recentReasons.length === 0 && <p className="text-muted-foreground text-center">No reasons yet. Be the first!</p>}
                       </CardContent>
                   </Card>
                   
@@ -173,7 +191,7 @@ export default function Home() {
                       <CardContent>
                           <Form {...noteForm}>
                             <form onSubmit={noteForm.handleSubmit(onNoteSubmit)} className="space-y-4">
-                              <FormField control={noteForm.control} name="note" render={({ field }) => (
+                              <FormField control={noteForm.control} name="message" render={({ field }) => (
                                   <FormItem>
                                       <Textarea placeholder="Write a note of encouragement..." {...field}/>
                                       <FormMessage />
@@ -185,6 +203,27 @@ export default function Home() {
                                       <FormMessage />
                                   </FormItem>
                               )}/>
+                              <FormField
+                                control={noteForm.control}
+                                name="mood"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select a mood for the letter" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="sad">For when you're feeling sad</SelectItem>
+                                        <SelectItem value="laugh">For when you need a laugh</SelectItem>
+                                        <SelectItem value="stressed">For when you're feeling stressed</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
                               <Button type="submit" className="w-full" disabled={noteForm.formState.isSubmitting}>
                                   {noteForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                   Send Note

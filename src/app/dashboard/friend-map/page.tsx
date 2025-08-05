@@ -1,16 +1,15 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Map, Pin } from "lucide-react";
 import Image from "next/image";
-
-const friends = [
-  { name: 'Alex', location: 'Tokyo, Japan', time: '9:00 PM', message: 'Miss you!', avatar: 'https://placehold.co/100x100/F9A8D4/4A234E.png?text=A', coords: { top: '35%', left: '85%' } },
-  { name: 'Mom', location: 'New York, USA', time: '8:00 AM', message: 'Call me soon!', avatar: 'https://placehold.co/100x100/E1BEE7/4A234E.png?text=M', coords: { top: '30%', left: '25%' } },
-  { name: 'Ben', location: 'London, UK', time: '1:00 PM', message: 'Hope you are well!', avatar: 'https://placehold.co/100x100/FDE2F3/4A234E.png?text=B', coords: { top: '25%', left: '48%' } },
-];
+import { friends, useFriends } from "@/lib/data-store";
 
 export default function FriendMapPage() {
+  const friendList = useFriends();
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <Card className="lg:col-span-2">
@@ -22,7 +21,7 @@ export default function FriendMapPage() {
             <TooltipProvider>
                 <div className="relative aspect-video w-full rounded-lg overflow-hidden">
                     <Image src="https://placehold.co/1200x600/FDE2F3/d05e94.png" alt="A World of Love for Jaya" layout="fill" objectFit="cover" data-ai-hint="pink world map"/>
-                    {friends.map(friend => (
+                    {friendList.map(friend => (
                         <Tooltip key={friend.name}>
                             <TooltipTrigger asChild>
                                 <div className="absolute transition-transform hover:scale-125" style={{ top: friend.coords.top, left: friend.coords.left }}>
@@ -47,7 +46,7 @@ export default function FriendMapPage() {
           <CardDescription>See what time it is for your friends around the world.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {friends.map(friend => (
+          {friendList.map(friend => (
             <div key={friend.name} className="flex items-center gap-4 p-2 bg-accent/10 rounded-lg">
               <Avatar>
                 <AvatarImage src={friend.avatar} />

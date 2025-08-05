@@ -9,11 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
-// This is a stand-in for a database to store reasons.
-// In a real application, you would use a proper database like Firestore.
-const userSubmittedReasons: string[] = [];
-
+import { reasons, addReason as addReasonToStore } from '@/lib/data-store';
 
 const GetRandomReasonOutputSchema = z.object({
   reason: z.string().describe('A randomly selected reason why Jaya is loved.'),
@@ -28,29 +24,19 @@ const AddReasonInputSchema = z.object({
 export type AddReasonInput = z.infer<typeof AddReasonInputSchema>;
 
 
-const baseReasons = [
-    "She is kind",
-    "She is smart",
-    "She is beautiful",
-    "She is funny",
-    "She is a good friend",
-    "She is a good daughter",
-    "She is a good sister"
-];
-
 const getRandomReasonFlow = ai.defineFlow(
     {
         name: "getRandomReasonFlow",
         outputSchema: GetRandomReasonOutputSchema
     },
     async () => {
-        const allReasons = [...baseReasons, ...userSubmittedReasons];
+        const allReasons = reasons;
         
         const response = await ai.generate({
             prompt: `You are a helpful assistant. From the following list of reasons, select one at random and return it.
 
             List of reasons:
-            ${allReasons.map(r => `- ${r}`).join('\n')}
+            ${allReasons.map(r => `- ${r.reason}`).join('\n')}
             
             Return only the text of the reason.`,
             model: 'googleai/gemini-2.0-flash',
@@ -73,8 +59,7 @@ const addReasonFlow = ai.defineFlow(
     },
     async ({ reason }) => {
         console.log(`New reason added: ${reason}`);
-        userSubmittedReasons.push(reason);
-        // In a real app, you would save this to a database.
+        addReasonToStore({ reason, from: 'a friend' });
     }
 );
 

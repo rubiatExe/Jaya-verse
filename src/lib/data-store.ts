@@ -13,7 +13,13 @@ export interface Reason {
   createdAt: Timestamp;
 }
 
+export interface AddReasonData {
+    reason: string;
+    from: string;
+}
+
 export interface DisplayReason extends Omit<Reason, 'createdAt'> {
+    id: string;
     createdAt: Date;
 }
 
@@ -133,11 +139,10 @@ export async function updateWater(glasses: number) {
     }
 }
 
-export async function addReasonToDb(reason: string) {
+export async function addReasonToDb(data: AddReasonData) {
   try {
     await addDoc(collection(db, 'reasons'), {
-      reason: reason,
-      from: 'a friend',
+      ...data,
       createdAt: serverTimestamp(),
     });
   } catch (error) {

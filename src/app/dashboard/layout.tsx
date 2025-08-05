@@ -80,8 +80,8 @@ export default function DashboardLayout({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                   <Link href="/" legacyBehavior passHref>
-                    <a className="w-full justify-start"><Home className="mr-2" />Public View</a>
+                   <Link href="/" className="w-full justify-start">
+                    <Home className="mr-2" />Public View
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>

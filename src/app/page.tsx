@@ -220,7 +220,7 @@ export default function Home() {
                                       <FormControl>
                                         <SelectTrigger>
                                           <SelectValue placeholder="Select a mood for the letter" />
-                                        </SelectTrigger>
+                                        </Trigger>
                                       </FormControl>
                                       <SelectContent>
                                         <SelectItem value="sad">For when you're feeling sad</SelectItem>

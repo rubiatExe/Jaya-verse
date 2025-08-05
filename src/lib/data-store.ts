@@ -10,7 +10,11 @@ export interface Reason {
   id?: string;
   reason: string;
   from: string;
-  createdAt?: Date;
+  createdAt: Timestamp;
+}
+
+export interface DisplayReason extends Omit<Reason, 'createdAt'> {
+    createdAt: Date;
 }
 
 export interface Letter {
@@ -60,7 +64,14 @@ function createRealtimeHook<T>(collectionName: string, orderField: string = 'cre
       
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+        const docs = snapshot.docs.map(doc => {
+            const docData = doc.data();
+            // Firestore timestamps need to be converted to JS Dates
+            if (docData.createdAt && docData.createdAt.toDate) {
+                docData.createdAt = docData.createdAt.toDate();
+            }
+            return { id: doc.id, ...docData } as T
+        });
         setData(docs);
       }, (error) => {
         console.error(`Error fetching ${collectionName}:`, error);
@@ -99,7 +110,7 @@ export function useWaterStatus() {
 }
 
 export const useReasons = createRealtimeHook<Reason>('reasons');
-export const useRecentReasons = createRealtimeHook<Reason>('reasons', 'createdAt', 2);
+export const useRecentReasons = createRealtimeHook<DisplayReason>('reasons', 'createdAt', 2);
 export const useLetters = createRealtimeHook<Letter>('letters');
 export const useFriends = createRealtimeHook<Friend>('friends');
 
@@ -125,7 +136,7 @@ export async function updateWater(glasses: number) {
 export async function addReasonToDb(reason: string) {
   try {
     await addDoc(collection(db, 'reasons'), {
-      reason,
+      reason: reason,
       from: 'a friend',
       createdAt: serverTimestamp(),
     });

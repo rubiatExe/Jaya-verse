@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Map, Pin } from "lucide-react";
 import Image from "next/image";
-import { friends, useFriends } from "@/lib/data-store";
+import { useFriends } from "@/lib/data-store";
 
 export default function FriendMapPage() {
   const friendList = useFriends();
@@ -22,7 +22,7 @@ export default function FriendMapPage() {
                 <div className="relative aspect-video w-full rounded-lg overflow-hidden">
                     <Image src="https://placehold.co/1200x600/FDE2F3/d05e94.png" alt="A World of Love for Jaya" layout="fill" objectFit="cover" data-ai-hint="pink world map"/>
                     {friendList.map(friend => (
-                        <Tooltip key={friend.name}>
+                        <Tooltip key={friend.id}>
                             <TooltipTrigger asChild>
                                 <div className="absolute transition-transform hover:scale-125" style={{ top: friend.coords.top, left: friend.coords.left }}>
                                     <Pin className="w-8 h-8 text-primary drop-shadow-lg" fill="hsl(var(--primary))"/>
@@ -47,7 +47,7 @@ export default function FriendMapPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {friendList.map(friend => (
-            <div key={friend.name} className="flex items-center gap-4 p-2 bg-accent/10 rounded-lg">
+            <div key={friend.id} className="flex items-center gap-4 p-2 bg-accent/10 rounded-lg">
               <Avatar>
                 <AvatarImage src={friend.avatar} />
                 <AvatarFallback>{friend.name.charAt(0)}</AvatarFallback>
@@ -62,8 +62,4 @@ export default function FriendMapPage() {
               </div>
             </div>
           ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+        </

@@ -9,13 +9,17 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { reasons, addReason as addReasonToStore } from '@/lib/data-store';
+
+const GetRandomReasonInputSchema = z.object({
+  reasons: z.array(z.string()).describe('A list of reasons why Jaya is loved.'),
+});
 
 const GetRandomReasonOutputSchema = z.object({
   reason: z.string().describe('A randomly selected reason why Jaya is loved.'),
 });
 
 export type GetRandomReasonOutput = z.infer<typeof GetRandomReasonOutputSchema>;
+export type GetRandomReasonInput = z.infer<typeof GetRandomReasonInputSchema>;
 
 const AddReasonInputSchema = z.object({
     reason: z.string().describe('A new reason why Jaya is loved.'),
@@ -23,20 +27,22 @@ const AddReasonInputSchema = z.object({
 
 export type AddReasonInput = z.infer<typeof AddReasonInputSchema>;
 
+export async function getRandomReason(input: GetRandomReasonInput): Promise<GetRandomReasonOutput> {
+  return getRandomReasonFlow(input);
+}
 
 const getRandomReasonFlow = ai.defineFlow(
     {
         name: "getRandomReasonFlow",
+        inputSchema: GetRandomReasonInputSchema,
         outputSchema: GetRandomReasonOutputSchema
     },
-    async () => {
-        const allReasons = reasons;
-        
+    async ({reasons}) => {
         const response = await ai.generate({
             prompt: `You are a helpful assistant. From the following list of reasons, select one at random and return it.
 
             List of reasons:
-            ${allReasons.map(r => `- ${r.reason}`).join('\n')}
+            ${reasons.map(r => `- ${r}`).join('\n')}
             
             Return only the text of the reason.`,
             model: 'googleai/gemini-2.0-flash',
@@ -45,24 +51,3 @@ const getRandomReasonFlow = ai.defineFlow(
         return { reason: response.text! };
     }
 );
-
-
-export async function getRandomReason(): Promise<GetRandomReasonOutput> {
-  return await getRandomReasonFlow();
-}
-
-
-const addReasonFlow = ai.defineFlow(
-    {
-        name: "addReasonFlow",
-        inputSchema: AddReasonInputSchema,
-    },
-    async ({ reason }) => {
-        console.log(`New reason added: ${reason}`);
-        addReasonToStore({ reason, from: 'a friend' });
-    }
-);
-
-export async function addReason(reason: string): Promise<void> {
-    await addReasonFlow({ reason });
-}

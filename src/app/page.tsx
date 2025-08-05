@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageSquare, Droplet, Send, Gift, MapPin, Loader2, Lock } from 'lucide-react';
 import { LifeRpg } from '@/components/life-rpg';
@@ -14,12 +13,12 @@ import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { addReason, addNoteAction, addPinAction } from '@/app/actions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useReasons } from '@/lib/data-store';
+import { useRecentReasons } from '@/lib/data-store';
 
 const reasonSchema = z.object({
   reason: z.string().min(3, "Your reason should be a little longer!").max(100, "That's a beautiful thought! Can you make it a bit more concise?"),
@@ -44,7 +43,7 @@ export default function Home() {
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const recentReasons = useReasons().slice(-2);
+  const recentReasons = useRecentReasons();
 
   const reasonForm = useForm<z.infer<typeof reasonSchema>>({
     resolver: zodResolver(reasonSchema),
@@ -156,8 +155,8 @@ export default function Home() {
                            </div>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                          {recentReasons.map((r, i) => (
-                             <div key={i} className="p-3 bg-accent/20 rounded-lg">
+                          {recentReasons.map((r) => (
+                             <div key={r.id} className="p-3 bg-accent/20 rounded-lg">
                                 <p className="italic">"{r.reason}"</p>
                                 <p className="text-right text-sm font-semibold text-primary">- {r.from}</p>
                             </div>

@@ -1,128 +1,126 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-// In-memory data store to simulate a database.
-// In a real application, you would use a proper database like Firestore.
+import { db } from './firebase';
+import { collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
 
 // ========= TYPES =========
 
 export interface Reason {
+  id?: string;
   reason: string;
   from: string;
+  createdAt?: Date;
 }
 
 export interface Letter {
+  id?: string;
   from: string;
   message: string;
   mood: 'sad' | 'laugh' | 'stressed';
+  createdAt?: Date;
 }
 
-export interface AddLetterData extends Omit<Letter, 'mood'> {
+export interface AddLetterData extends Omit<Letter, 'id' | 'createdAt' | 'mood'> {
     mood: 'sad' | 'laugh' | 'stressed';
 }
 
-
 export interface Friend {
+  id?: string;
   name: string;
   location: string;
   time: string;
   message: string;
   avatar: string;
   coords: { top: string; left: string };
+  createdAt?: Date;
 }
 
-export interface AddFriendData extends Omit<Friend, 'time' | 'avatar' | 'coords'> {}
+export interface AddFriendData extends Omit<Friend, 'id' | 'time' | 'avatar' | 'coords' | 'createdAt'> {}
 
 
-// ========= DATA =========
+// ========= HOOKS for real-time data =========
 
-const defaultReasons: Reason[] = [
-    { reason: "She is kind", from: "Ben"},
-    { reason: "She is smart", from: "Mom"},
-    { reason: "She is beautiful", from: "Dad"},
-    { reason: "She is funny", from: "Bestie"},
-];
-
-const defaultLetters: Letter[] = [
-    { from: "Dad", message: "Remember that time we... you always bounce back stronger!", mood: 'sad' }, 
-    { from: "Bestie", message: "You are a ray of sunshine, even on cloudy days. ✨", mood: 'sad' },
-    { from: "Ben", message: "Let's celebrate! So proud of whatever you did!", mood: 'laugh' }, 
-    { from: "Mom", message: "Your happiness is my happiness.", mood: 'laugh' },
-    { from: "Grandma", message: "Take a deep breath. This too shall pass. I love you.", mood: 'stressed' },
-];
-
-const defaultFriends: Friend[] = [
-  { name: 'Alex', location: 'Tokyo, Japan', time: '9:00 PM', message: 'Miss you!', avatar: 'https://placehold.co/100x100/F9A8D4/4A234E.png?text=A', coords: { top: '35%', left: '85%' } },
-  { name: 'Mom', location: 'New York, USA', time: '8:00 AM', message: 'Call me soon!', avatar: 'https://placehold.co/100x100/E1BEE7/4A234E.png?text=M', coords: { top: '30%', left: '25%' } },
-  { name: 'Ben', location: 'London, UK', time: '1:00 PM', message: 'Hope you are well!', avatar: 'https://placehold.co/100x100/FDE2F3/4A234E.png?text=B', coords: { top: '25%', left: '48%' } },
-];
-
-
-export let reasons: Reason[] = [...defaultReasons];
-export let letters: Letter[] = [...defaultLetters];
-export let friends: Friend[] = [...defaultFriends];
-
-// ========= STATE MANAGEMENT & HOOKS =========
-
-// A simple event emitter to notify components of data changes.
-class EventEmitter {
-  private listeners: Set<() => void> = new Set();
-  subscribe(listener: () => void) {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-  emit() {
-    this.listeners.forEach(listener => listener());
-  }
-}
-
-const dataStoreEmitter = new EventEmitter();
-
-
-function createDataHook<T>(dataArray: T[]) {
+function createRealtimeHook<T>(collectionName: string, orderField: string = 'createdAt', lim: number | null = null) {
   return function useData() {
-    const [data, setData] = useState(dataArray);
+    const [data, setData] = useState<T[]>([]);
 
     useEffect(() => {
-      const unsubscribe = dataStoreEmitter.subscribe(() => {
-        setData([...dataArray]);
+      let q;
+      if (lim) {
+         q = query(collection(db, collectionName), orderBy(orderField, 'desc'), limit(lim));
+      } else {
+         q = query(collection(db, collectionName), orderBy(orderField, 'desc'));
+      }
+      
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+        setData(docs);
+      }, (error) => {
+        console.error(`Error fetching ${collectionName}:`, error);
+        // Optionally, set an error state here
       });
-      return unsubscribe;
-    }, []);
+
+      return () => unsubscribe();
+    }, [collectionName, orderField, lim]);
 
     return data;
   }
 }
 
-export const useReasons = createDataHook(reasons);
-export const useLetters = createDataHook(letters);
-export const useFriends = createDataHook(friends);
+export const useReasons = createRealtimeHook<Reason>('reasons');
+export const useRecentReasons = createRealtimeHook<Reason>('reasons', 'createdAt', 2);
+export const useLetters = createRealtimeHook<Letter>('letters');
+export const useFriends = createRealtimeHook<Friend>('friends');
 
 
-// ========= ACTIONS =========
+// ========= ACTIONS (writing to Firestore) =========
 
-export function addReason(newReason: Omit<Reason, 'from'> & { from?: string }) {
-  reasons.push({ from: 'a friend', ...newReason });
-  dataStoreEmitter.emit();
+export async function addReason(newReason: Omit<Reason, 'from' | 'id' | 'createdAt'> & { from?: string }) {
+  try {
+    await addDoc(collection(db, 'reasons'), {
+      ...newReason,
+      from: newReason.from || 'a friend',
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error adding reason: ", error);
+    throw new Error("Could not add reason.");
+  }
 }
 
-export function addLetter(newLetter: AddLetterData) {
-  letters.push({ ...newLetter });
-  dataStoreEmitter.emit();
+export async function addLetter(newLetter: AddLetterData) {
+  try {
+    await addDoc(collection(db, 'letters'), {
+        ...newLetter,
+        createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error adding letter: ", error);
+    throw new Error("Could not add letter.");
+  }
 }
 
-export function addFriend(newFriend: AddFriendData) {
+export async function addFriend(newFriend: AddFriendData) {
+  try {
     // Generate random coordinates for the map pin
     const top = `${Math.random() * 60 + 20}%`; // 20% to 80%
     const left = `${Math.random() * 80 + 10}%`; // 10% to 90%
 
-    const friend: Friend = {
+    const friend: Omit<Friend, 'id'> = {
         ...newFriend,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'}),
         avatar: `https://placehold.co/100x100.png?text=${newFriend.name.charAt(0)}`,
         coords: { top, left },
+        createdAt: new Date(), // Using client-side date for simplicity here
     }
-    friends.push(friend);
-    dataStoreEmitter.emit();
+     await addDoc(collection(db, 'friends'), {
+      ...friend,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error adding friend: ", error);
+    throw new Error("Could not add friend.");
+  }
 }

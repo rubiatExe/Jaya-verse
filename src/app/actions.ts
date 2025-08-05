@@ -1,12 +1,26 @@
 'use server';
 
-import { getRandomReason as getRandomReasonFlow, addReason as addReasonFlow } from '@/ai/flows/reasons-we-love-you-jar';
+import { getRandomReason as getRandomReasonFromFlow } from '@/ai/flows/reasons-we-love-you-jar';
 import type { GetRandomReasonOutput } from '@/ai/flows/reasons-we-love-you-jar';
-import { addFriend, addLetter, type Friend, type Letter, type AddFriendData, type AddLetterData } from '@/lib/data-store';
+import { addFriend as addFriendToDb, addLetter as addLetterToDb, addReason as addReasonToDb, type AddFriendData, type AddLetterData } from '@/lib/data-store';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+async function getReasonsFromDb() {
+    const reasonsCol = collection(db, 'reasons');
+    const reasonSnapshot = await getDocs(reasonsCol);
+    const reasonList = reasonSnapshot.docs.map(doc => doc.data().reason);
+    return reasonList;
+}
+
 
 export async function getRandomReason(): Promise<GetRandomReasonOutput> {
   try {
-    const result = await getRandomReasonFlow();
+    const reasons = await getReasonsFromDb();
+    if (reasons.length === 0) {
+        return { reason: "No reasons yet, but we know you're loved!" };
+    }
+    const result = await getRandomReasonFromFlow({reasons});
     return result;
   } catch (error) {
     console.error('Error in getRandomReason server action:', error);
@@ -17,7 +31,7 @@ export async function getRandomReason(): Promise<GetRandomReasonOutput> {
 
 export async function addReason(reason: string): Promise<void> {
     try {
-        await addReasonFlow(reason);
+        await addReasonToDb({ reason });
     } catch (error) {
         console.error('Error in addReason server action:', error);
         throw new Error("Could not add reason.");
@@ -26,7 +40,7 @@ export async function addReason(reason: string): Promise<void> {
 
 export async function addNoteAction(data: AddLetterData) {
   try {
-    addLetter(data);
+    await addLetterToDb(data);
   } catch (error) {
     console.error('Error in addNoteAction:', error);
     throw new Error('Could not add your note.');
@@ -35,7 +49,7 @@ export async function addNoteAction(data: AddLetterData) {
 
 export async function addPinAction(data: AddFriendData) {
   try {
-    addFriend(data);
+    await addFriendToDb(data);
   } catch (error) {
     console.error('Error in addPinAction:', error);
     throw new Error('Could not add your pin.');

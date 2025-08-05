@@ -2,14 +2,14 @@
 
 import { getRandomReason as getRandomReasonFromFlow } from '@/ai/flows/reasons-we-love-you-jar';
 import type { GetRandomReasonOutput } from '@/ai/flows/reasons-we-love-you-jar';
-import { addFriendToDb, addLetterToDb, addReasonToDb, type AddFriendData, type AddLetterData, type AddReasonData } from '@/lib/data-store';
+import { addFriendToDb, addLetterToDb, addReasonToDb, type AddFriendData, type AddLetterData, type AddReasonData, Reason } from '@/lib/data-store';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-async function getReasonsFromDb() {
+async function getReasonsFromDb(): Promise<string[]> {
     const reasonsCol = collection(db, 'reasons');
     const reasonSnapshot = await getDocs(reasonsCol);
-    const reasonList = reasonSnapshot.docs.map(doc => doc.data().reason);
+    const reasonList = reasonSnapshot.docs.map(doc => (doc.data() as Reason).reason);
     return reasonList;
 }
 
@@ -29,10 +29,10 @@ export async function getRandomReason(): Promise<GetRandomReasonOutput> {
   }
 }
 
-export async function addReason(data: {reason: string}): Promise<void> {
+export async function addReason(data: AddReasonData): Promise<void> {
     try {
         await addReasonToDb({
-            reason: data.reason,
+            ...data,
             from: 'a friend'
         });
     } catch (error) {

@@ -204,26 +204,14 @@ export default function Home() {
                       <CardHeader className="flex flex-row items-center gap-4 space-y-0">
                            <Send className="w-8 h-8 text-primary flex-shrink-0"/>
                            <div>
-                              <CardTitle className="font-headline text-2xl">Leave a Public Note</CardTitle>
+                              <CardTitle className="font-headline text-2xl">Leave a Private Note</CardTitle>
                               <CardDescription>Leave a personal note for one of the "Open When..." letter categories.</CardDescription>
                            </div>
                       </CardHeader>
                       <CardContent>
                           <Form {...noteForm}>
                             <form onSubmit={noteForm.handleSubmit(onNoteSubmit)} className="space-y-4">
-                              <FormField control={noteForm.control} name="message" render={({ field }) => (
-                                  <FormItem>
-                                      <Textarea placeholder="Write a note of encouragement..." {...field}/>
-                                      <FormMessage />
-                                  </FormItem>
-                              )}/>
-                               <FormField control={noteForm.control} name="from" render={({ field }) => (
-                                  <FormItem>
-                                      <Input placeholder="Your name" {...field}/>
-                                      <FormMessage />
-                                  </FormItem>
-                              )}/>
-                              <FormField
+                                <FormField
                                 control={noteForm.control}
                                 name="mood"
                                 render={({ field }) => (
@@ -244,6 +232,18 @@ export default function Home() {
                                   </FormItem>
                                 )}
                               />
+                               <FormField control={noteForm.control} name="from" render={({ field }) => (
+                                  <FormItem>
+                                      <Input placeholder="Your name" {...field}/>
+                                      <FormMessage />
+                                  </FormItem>
+                              )}/>
+                                <FormField control={noteForm.control} name="message" render={({ field }) => (
+                                  <FormItem>
+                                      <Textarea placeholder="Write a note of encouragement..." {...field}/>
+                                      <FormMessage />
+                                  </FormItem>
+                              )}/>
                               <Button type="submit" className="w-full" disabled={noteForm.formState.isSubmitting}>
                                   {noteForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                   Send Note

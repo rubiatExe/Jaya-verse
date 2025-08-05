@@ -124,11 +124,11 @@ export async function updateWater(glasses: number) {
     }
 }
 
-export async function addReason(newReason: Omit<Reason, 'from' | 'id' | 'createdAt'> & { from?: string }) {
+export async function addReason(reason: string) {
   try {
     await addDoc(collection(db, 'reasons'), {
-      ...newReason,
-      from: newReason.from || 'a friend',
+      reason,
+      from: 'a friend',
       createdAt: serverTimestamp(),
     });
   } catch (error) {

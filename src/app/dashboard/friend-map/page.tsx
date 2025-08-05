@@ -62,4 +62,8 @@ export default function FriendMapPage() {
               </div>
             </div>
           ))}
-        </
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

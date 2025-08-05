@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -230,8 +231,7 @@ export default function Home() {
                                     </Select>
                                     <FormMessage />
                                   </FormItem>
-                                )}
-                              />
+                                )}/>
                                <FormField control={noteForm.control} name="from" render={({ field }) => (
                                   <FormItem>
                                       <Input placeholder="Your name" {...field}/>
@@ -353,5 +353,5 @@ export default function Home() {
         </DialogContent>
       </Dialog>
     </>
-  );
-}
+
+    

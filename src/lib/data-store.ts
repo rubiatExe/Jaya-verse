@@ -16,7 +16,7 @@ export interface Reason {
 
 export interface AddReasonData {
     reason: string;
-    from: string;
+    from?: string;
 }
 
 export interface DisplayReason {
@@ -60,6 +60,12 @@ export interface LifeRpgStatus {
     details: Record<ActivityKey, string>;
 }
 
+// Helper to get date string in GMT+5:30
+function getIndiaDateString() {
+    // 'en-CA' locale formats date as YYYY-MM-DD
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+}
+
 
 // ========= HOOKS for real-time data =========
 
@@ -100,7 +106,7 @@ function createRealtimeHook<T>(collectionName: string, orderField: string = 'cre
 
 export function useWaterStatus() {
     const [status, setStatus] = useState<WaterStatus | null>(null);
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const today = getIndiaDateString();
 
     useEffect(() => {
         const docRef = doc(db, 'waterStatus', today);
@@ -173,7 +179,7 @@ export async function updateLifeRpgStatus(newStatus: Partial<LifeRpgStatus>) {
 }
 
 export async function updateWater(glasses: number) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getIndiaDateString();
     const docRef = doc(db, 'waterStatus', today);
     try {
         await updateDoc(docRef, { currentGlasses: glasses });

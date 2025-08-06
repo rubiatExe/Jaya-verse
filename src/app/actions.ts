@@ -2,6 +2,8 @@
 
 import { getRandomReason as getRandomReasonFromFlow } from '@/ai/flows/reasons-we-love-you-jar';
 import type { GetRandomReasonOutput } from '@/ai/flows/reasons-we-love-you-jar';
+import { reframeThought as reframeThoughtFromFlow } from '@/ai/flows/reframe-thought-flow';
+import type { ReframeThoughtInput, ReframeThoughtOutput } from '@/ai/flows/reframe-thought-flow';
 import { addFriendToDb, addLetterToDb, addReasonToDb, type AddFriendData, type AddLetterData, type AddReasonData, Reason } from '@/lib/data-store';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -57,4 +59,14 @@ export async function addPinAction(data: AddFriendData) {
     console.error('Error in addPinAction:', error);
     throw new Error('Could not add your pin.');
   }
+}
+
+export async function reframeThoughtAction(input: ReframeThoughtInput): Promise<ReframeThoughtOutput> {
+    try {
+        const result = await reframeThoughtFromFlow(input);
+        return result;
+    } catch (error) {
+        console.error('Error in reframeThoughtAction:', error);
+        return { reframedThought: "I had a little trouble reframing that, but remember to be kind to yourself. You are doing great." };
+    }
 }

@@ -1,10 +1,11 @@
 
 "use client";
 
+import { useState, useEffect } from 'react';
 import { useWaterStatus, updateWater } from '@/lib/data-store';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GlassWater, Plus, Minus, Sprout, Loader2 } from "lucide-react";
+import { GlassWater, Plus, Minus, Sprout, Loader2, Timer } from "lucide-react";
 import { Progress } from '@/components/ui/progress';
 
 const RoseFlower = () => (
@@ -27,6 +28,48 @@ const RoseStem = ({ progress }: { progress: number }) => {
         </div>
     );
 };
+
+const CountdownTimer = () => {
+    const [timeLeft, setTimeLeft] = useState('');
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            // Get current date in UTC
+            const now = new Date();
+            
+            // Create a date object for current time in India
+            const indiaNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+
+            // Create a date object for the next midnight in India
+            const tomorrow = new Date(indiaNow);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+
+            // Calculate difference in milliseconds
+            const diff = tomorrow.getTime() - indiaNow.getTime();
+
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / 1000 / 60) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            setTimeLeft(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    if (!timeLeft) {
+        return <Loader2 className="w-4 h-4 animate-spin" />;
+    }
+
+    return (
+         <div className="flex items-center text-sm text-muted-foreground">
+            <Timer className="mr-2 h-4 w-4" />
+            Resets in: <span className="font-semibold ml-1 text-primary">{timeLeft}</span>
+        </div>
+    );
+};
+
 
 export default function WaterTrackerPage() {
     const waterStatus = useWaterStatus();
@@ -71,6 +114,9 @@ export default function WaterTrackerPage() {
                         </Button>
                     </div>
                 </CardContent>
+                <CardFooter>
+                    <CountdownTimer />
+                </CardFooter>
             </Card>
 
             <Card>

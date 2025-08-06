@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageSquare, Droplet, Send, Gift, MapPin, Loader2, Lock } from 'lucide-react';
+import { Heart, MessageSquare, Droplet, Send, Gift, MapPin, Loader2, Lock, Sprout } from 'lucide-react';
 import { LifeRpg } from '@/components/life-rpg';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -44,7 +44,7 @@ function PublicWaterTracker() {
   if (!waterStatus) {
     return (
        <CardContent className="space-y-2">
-          <Progress value={0} className="h-3" />
+          <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
           <p className="text-sm text-muted-foreground text-center">Loading water status...</p>
       </CardContent>
     );
@@ -53,10 +53,27 @@ function PublicWaterTracker() {
   const { currentGlasses, goalGlasses } = waterStatus;
   const progress = goalGlasses > 0 ? (currentGlasses / goalGlasses) * 100 : 0;
   
+  const RoseIcon = ({ progress }: { progress: number }) => {
+    const height = 24 + (progress * 0.56); // from 24px to 80px
+    return <Sprout className="text-green-600 transition-all duration-500" style={{ height: `${height}px`, width: `${height}px`, color: 'hsl(140 50% 50%)' }} />;
+  };
+  
   return (
-    <CardContent className="space-y-2">
-        <Progress value={progress} className="h-3" />
-        <p className="text-sm text-muted-foreground text-center">Jaya has drunk {currentGlasses}/{goalGlasses} glasses today!</p>
+    <CardContent className="grid grid-cols-3 items-center gap-4">
+      <div className="col-span-2 space-y-2">
+          <p className="text-sm text-muted-foreground text-center">Jaya has drunk {currentGlasses}/{goalGlasses} glasses today!</p>
+          <Progress value={progress} className="h-3" />
+      </div>
+      <div className="col-span-1 flex items-end justify-center h-[100px] bg-accent/10 rounded-lg p-2 relative">
+          <RoseIcon progress={progress} />
+          {progress >= 100 && (
+            <>
+              <span className='text-2xl absolute' style={{top: '40%', left: '45%', transform: 'rotate(-10deg)'}}>🌹</span>
+              <span className='text-2xl absolute' style={{top: '30%', left: '60%', transform: 'rotate(15deg)'}}>🌹</span>
+              <span className='text-2xl absolute' style={{top: '50%', left: '30%', transform: 'rotate(5deg)'}}>🌹</span>
+            </>
+          )}
+      </div>
     </CardContent>
   );
 }

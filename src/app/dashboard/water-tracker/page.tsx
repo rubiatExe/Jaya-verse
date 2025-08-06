@@ -25,9 +25,9 @@ export default function WaterTrackerPage() {
         updateWater(clampedCount);
     }
 
-    const PlantIcon = ({ progress }: { progress: number }) => {
+    const RoseIcon = ({ progress }: { progress: number }) => {
         const height = 24 + (progress * 0.76); // from 24px to 100px
-        return <Sprout className="text-primary transition-all duration-500" style={{ height: `${height}px`, width: `${height}px` }} />;
+        return <Sprout className="text-green-600 transition-all duration-500" style={{ height: `${height}px`, width: `${height}px`, color: 'hsl(140 50% 50%)' }} />;
     };
 
     return (
@@ -35,7 +35,7 @@ export default function WaterTrackerPage() {
             <Card className="md:col-span-2">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline"><GlassWater className="text-primary" /> Water Tracker</CardTitle>
-                    <CardDescription>Log your daily water intake and watch your digital plant grow!</CardDescription>
+                    <CardDescription>Log your daily water intake and watch your digital rose grow!</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="text-center">
@@ -58,16 +58,16 @@ export default function WaterTrackerPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline">Your Plant</CardTitle>
+                    <CardTitle className="font-headline">Your Rose</CardTitle>
                     <CardDescription>It blooms when you reach your goal!</CardDescription>
                 </CardHeader>
                 <CardContent className="flex items-end justify-center h-[200px] bg-accent/20 rounded-lg p-4 relative">
-                     <PlantIcon progress={progress} />
+                     <RoseIcon progress={progress} />
                      {progress >= 100 && (
                         <>
-                           <span className='text-3xl absolute' style={{top: '40%', left: '45%', transform: 'rotate(-10deg)'}}>🌸</span>
-                           <span className='text-3xl absolute' style={{top: '30%', left: '60%', transform: 'rotate(15deg)'}}>🌺</span>
-                           <span className='text-3xl absolute' style={{top: '50%', left: '30%', transform: 'rotate(5deg)'}}>🌷</span>
+                           <span className='text-3xl absolute' style={{top: '40%', left: '45%', transform: 'rotate(-10deg)'}}>🌹</span>
+                           <span className='text-3xl absolute' style={{top: '30%', left: '60%', transform: 'rotate(15deg)'}}>🌹</span>
+                           <span className='text-3xl absolute' style={{top: '50%', left: '30%', transform: 'rotate(5deg)'}}>🌹</span>
                         </>
                      )}
                 </CardContent>

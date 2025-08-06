@@ -22,8 +22,8 @@ const RoseStem = ({ progress }: { progress: number }) => {
         <div className="relative w-full h-full flex items-end justify-center">
              <div className="w-1.5 bg-green-600 rounded-t-full" style={{ height: `${height}px`, transition: 'height 0.5s ease-out' }}></div>
              {/* Leaves */}
-             {progress > 30 && <div className="absolute w-8 h-4 bg-green-500 rounded-full -translate-x-3" style={{ bottom: '25%', transform: 'rotate(-30deg)'}} />}
-             {progress > 50 && <div className="absolute w-8 h-4 bg-green-500 rounded-full translate-x-3" style={{ bottom: '45%', transform: 'rotate(30deg)'}} />}
+             {progress > 30 && <div className="absolute w-8 h-4 bg-green-500 rounded-full -translate-x-3 transition-opacity duration-500" style={{ bottom: '25%', transform: 'rotate(-30deg)'}} />}
+             {progress > 50 && <div className="absolute w-8 h-4 bg-green-500 rounded-full translate-x-3 transition-opacity duration-500" style={{ bottom: '45%', transform: 'rotate(30deg)'}} />}
         </div>
     );
 };

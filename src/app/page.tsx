@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageSquare, Droplet, Send, Gift, MapPin, Loader2, Lock, Sprout } from 'lucide-react';
+import { Heart, MessageSquare, Droplet, Send, Gift, MapPin, Loader2, Lock } from 'lucide-react';
 import { LifeRpg } from '@/components/life-rpg';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -37,6 +38,27 @@ const pinSchema = z.object({
   message: z.string().min(3, "Please leave a short message!").max(50, "Message is too long."),
 });
 
+const RoseFlower = () => (
+    <div className="relative w-10 h-10">
+        <div className="absolute w-10 h-10 bg-pink-400 rounded-full animate-bounce"></div>
+        <div className="absolute top-1/2 left-1/2 w-6 h-6 bg-pink-500 rounded-full" style={{transform: 'translate(-50%, -50%)'}}></div>
+        <div className="absolute w-3 h-3 bg-pink-600 rounded-full" style={{top: '25%', left: '25%', transform: 'translate(-50%, -50%)'}}></div>
+    </div>
+);
+
+
+const RoseStem = ({ progress }: { progress: number }) => {
+    const height = progress > 0 ? (progress / 100) * 60 : 0; // Stem height up to 60px
+    return (
+        <div className="relative w-full h-full flex items-end justify-center">
+             <div className="w-1.5 bg-green-600 rounded-t-full" style={{ height: `${height}px`, transition: 'height 0.5s ease-out' }}></div>
+             {/* Leaves */}
+             {progress > 30 && <div className="absolute w-6 h-3 bg-green-500 rounded-full -translate-x-2" style={{ bottom: '25%', transform: 'rotate(-30deg)'}} />}
+             {progress > 50 && <div className="absolute w-6 h-3 bg-green-500 rounded-full translate-x-2" style={{ bottom: '45%', transform: 'rotate(30deg)'}} />}
+        </div>
+    );
+};
+
 
 function PublicWaterTracker() {
   const waterStatus = useWaterStatus();
@@ -53,11 +75,6 @@ function PublicWaterTracker() {
   const { currentGlasses, goalGlasses } = waterStatus;
   const progress = goalGlasses > 0 ? (currentGlasses / goalGlasses) * 100 : 0;
   
-  const RoseIcon = ({ progress }: { progress: number }) => {
-    const height = 24 + (progress * 0.56); // from 24px to 80px
-    return <Sprout className="text-green-600 transition-all duration-500" style={{ height: `${height}px`, width: `${height}px`, color: 'hsl(140 50% 50%)' }} />;
-  };
-  
   return (
     <CardContent className="grid grid-cols-3 items-center gap-4">
       <div className="col-span-2 space-y-2">
@@ -65,14 +82,16 @@ function PublicWaterTracker() {
           <Progress value={progress} className="h-3" />
       </div>
       <div className="col-span-1 flex items-end justify-center h-[100px] bg-accent/10 rounded-lg p-2 relative">
-          <RoseIcon progress={progress} />
-          {progress >= 100 && (
-            <>
-              <span className='text-2xl absolute' style={{top: '40%', left: '45%', transform: 'rotate(-10deg)'}}>🌹</span>
-              <span className='text-2xl absolute' style={{top: '30%', left: '60%', transform: 'rotate(15deg)'}}>🌹</span>
-              <span className='text-2xl absolute' style={{top: '50%', left: '30%', transform: 'rotate(5deg)'}}>🌹</span>
-            </>
-          )}
+          <div className="absolute inset-0 flex flex-col items-center justify-end">
+              <div className="h-[80px] w-full relative">
+                  {progress >= 100 && (
+                      <div className="absolute bottom-[50px] left-1/2 -translate-x-1/2">
+                          <RoseFlower />
+                      </div>
+                  )}
+                  <RoseStem progress={progress} />
+              </div>
+          </div>
       </div>
     </CardContent>
   );

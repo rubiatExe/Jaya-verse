@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useWaterStatus, updateWater } from '@/lib/data-store';
@@ -5,6 +6,27 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { GlassWater, Plus, Minus, Sprout, Loader2 } from "lucide-react";
 import { Progress } from '@/components/ui/progress';
+
+const RoseFlower = () => (
+    <div className="relative w-12 h-12">
+        <div className="absolute w-12 h-12 bg-pink-400 rounded-full animate-bounce"></div>
+        <div className="absolute top-1/2 left-1/2 w-8 h-8 bg-pink-500 rounded-full" style={{transform: 'translate(-50%, -50%)'}}></div>
+        <div className="absolute w-4 h-4 bg-pink-600 rounded-full" style={{top: '25%', left: '25%', transform: 'translate(-50%, -50%)'}}></div>
+    </div>
+);
+
+
+const RoseStem = ({ progress }: { progress: number }) => {
+    const height = progress > 0 ? (progress / 100) * 80 : 0; // Stem height up to 80px
+    return (
+        <div className="relative w-full h-full flex items-end justify-center">
+             <div className="w-1.5 bg-green-600 rounded-t-full" style={{ height: `${height}px`, transition: 'height 0.5s ease-out' }}></div>
+             {/* Leaves */}
+             {progress > 30 && <div className="absolute w-8 h-4 bg-green-500 rounded-full -translate-x-3" style={{ bottom: '25%', transform: 'rotate(-30deg)'}} />}
+             {progress > 50 && <div className="absolute w-8 h-4 bg-green-500 rounded-full translate-x-3" style={{ bottom: '45%', transform: 'rotate(30deg)'}} />}
+        </div>
+    );
+};
 
 export default function WaterTrackerPage() {
     const waterStatus = useWaterStatus();
@@ -24,11 +46,6 @@ export default function WaterTrackerPage() {
         const clampedCount = Math.max(0, Math.min(goalGlasses, newCount));
         updateWater(clampedCount);
     }
-
-    const RoseIcon = ({ progress }: { progress: number }) => {
-        const height = 24 + (progress * 0.76); // from 24px to 100px
-        return <Sprout className="text-green-600 transition-all duration-500" style={{ height: `${height}px`, width: `${height}px`, color: 'hsl(140 50% 50%)' }} />;
-    };
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
@@ -61,17 +78,20 @@ export default function WaterTrackerPage() {
                     <CardTitle className="font-headline">Your Rose</CardTitle>
                     <CardDescription>It blooms when you reach your goal!</CardDescription>
                 </CardHeader>
-                <CardContent className="flex items-end justify-center h-[200px] bg-accent/20 rounded-lg p-4 relative">
-                     <RoseIcon progress={progress} />
-                     {progress >= 100 && (
-                        <>
-                           <span className='text-3xl absolute' style={{top: '40%', left: '45%', transform: 'rotate(-10deg)'}}>🌹</span>
-                           <span className='text-3xl absolute' style={{top: '30%', left: '60%', transform: 'rotate(15deg)'}}>🌹</span>
-                           <span className='text-3xl absolute' style={{top: '50%', left: '30%', transform: 'rotate(5deg)'}}>🌹</span>
-                        </>
-                     )}
+                <CardContent className="flex items-center justify-center h-[200px] bg-accent/20 rounded-lg p-4 relative">
+                     <div className="absolute inset-0 flex flex-col items-center justify-end">
+                        <div className="h-[120px] w-full relative">
+                           {progress >= 100 && (
+                             <div className="absolute bottom-[70px] left-1/2 -translate-x-1/2">
+                                 <RoseFlower />
+                             </div>
+                           )}
+                           <RoseStem progress={progress} />
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
         </div>
     );
 }
+

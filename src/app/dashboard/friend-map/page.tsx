@@ -1,69 +1,105 @@
 'use client';
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Map, Pin } from "lucide-react";
+import { Map, MapPin } from "lucide-react";
 import Image from "next/image";
-import { useFriends } from "@/lib/data-store";
+import { useFriends, type Friend } from "@/lib/data-store";
+
+// Global Friends Widget Component
+const GlobalFriendsWidget = ({ friendPins }: { friendPins: Friend[] }) => {
+    const [times, setTimes] = useState<Record<string, { time: string; emoji: string }>>({});
+
+    useEffect(() => {
+        const getTimes = () => {
+            const newTimes: Record<string, { time: string; emoji: string }> = {};
+            friendPins.forEach(pin => {
+                if(pin.timeZone) {
+                    try {
+                        const time = new Date().toLocaleTimeString('en-US', { timeZone: pin.timeZone, hour: 'numeric', minute: '2-digit', hour12: true });
+                        const hour = parseInt(new Date().toLocaleTimeString('en-US', { timeZone: pin.timeZone, hour: 'numeric', hour12: false }));
+                        const emoji = (hour >= 6 && hour < 12) ? '☀️' : (hour >= 12 && hour < 18) ? '🏙️' : (hour >= 18 && hour < 22) ? '🌇' : '🌙';
+                        newTimes[pin.name] = { time, emoji };
+                    } catch (e) {
+                        // Invalid timezone
+                        newTimes[pin.name] = { time: "N/A", emoji: "🤷" };
+                    }
+                }
+            });
+            setTimes(newTimes);
+        };
+
+        if (friendPins.length > 0) {
+            getTimes();
+            const interval = setInterval(getTimes, 60000); // Update every minute
+            return () => clearInterval(interval);
+        }
+    }, [friendPins]);
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline text-xl text-center">Friends Around the World</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {friendPins.map(pin => (
+                        <div key={pin.id} className="p-3 bg-accent/20 rounded-lg text-center flex flex-col items-center">
+                             <Avatar>
+                                <AvatarImage src={pin.avatar} />
+                                <AvatarFallback>{pin.name.charAt(0)}</AvatarFallback>
+                             </Avatar>
+                            <p className="font-bold text-primary mt-2">{pin.name}</p>
+                            <p className="text-sm text-muted-foreground">{pin.location}</p>
+                            <p className="text-lg font-mono text-accent-foreground mt-1">{times[pin.name]?.time} {times[pin.name]?.emoji}</p>
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
+// Friend Map Component
+const FriendMap = ({ friendPins }: { friendPins: Friend[] }) => {
+    const [activePin, setActivePin] = useState<Friend | null>(null);
+    return (
+        <div className="space-y-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 font-headline"><Map className="text-primary" /> Jaya's World of Friends</CardTitle>
+                    <CardDescription>A world map showing pins from all your friends and their lovely messages.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="relative w-full max-w-4xl mx-auto aspect-video bg-blue-200 rounded-lg overflow-hidden border-2 border-primary/20">
+                        <Image src="https://placehold.co/1200x600/FDE2F3/d05e94.png" alt="A World of Love for Jaya" layout="fill" objectFit="cover" data-ai-hint="pink world map"/>
+                        {friendPins.map((pin) => (
+                            <div key={pin.id} className="absolute" style={{ left: pin.coords.left, top: pin.coords.top }} onMouseEnter={() => setActivePin(pin)} onMouseLeave={() => setActivePin(null)}>
+                                <div className="animate-bounce transform -translate-x-1/2 -translate-y-full">
+                                    <MapPin className="w-8 h-8 text-primary cursor-pointer drop-shadow-lg" fill="hsl(var(--primary))"/>
+                                </div>
+                                {activePin && activePin.id === pin.id && (
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-background p-2 rounded-lg shadow-lg text-center z-10 border">
+                                        <p className="font-bold text-primary">{pin.name}</p>
+                                        <p className="text-sm text-muted-foreground">{pin.location}</p>
+                                        <p className="text-sm text-accent-foreground italic">"{pin.message}"</p>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+            
+            <GlobalFriendsWidget friendPins={friendPins} />
+        </div>
+    );
+};
+
 
 export default function FriendMapPage() {
   const friendList = useFriends();
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-headline"><Map className="text-primary" /> Friend Map</CardTitle>
-          <CardDescription>A world map showing pins from all your friends and their lovely messages.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <TooltipProvider>
-                <div className="relative aspect-video w-full rounded-lg overflow-hidden">
-                    <Image src="https://placehold.co/1200x600/FDE2F3/d05e94.png" alt="A World of Love for Jaya" layout="fill" objectFit="cover" data-ai-hint="pink world map"/>
-                    {friendList.map(friend => (
-                        <Tooltip key={friend.id}>
-                            <TooltipTrigger asChild>
-                                <div className="absolute transition-transform hover:scale-125" style={{ top: friend.coords.top, left: friend.coords.left }}>
-                                    <Pin className="w-8 h-8 text-primary drop-shadow-lg" fill="hsl(var(--primary))"/>
-                                </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p className="font-bold">{friend.name}</p>
-                                <p className="text-sm">{friend.location}</p>
-                                <p className="italic">"{friend.message}"</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    ))}
-                </div>
-            </TooltipProvider>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-headline"><Pin className="text-primary" /> Global Friends</CardTitle>
-          <CardDescription>See what time it is for your friends around the world.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {friendList.map(friend => (
-            <div key={friend.id} className="flex items-center gap-4 p-2 bg-accent/10 rounded-lg">
-              <Avatar>
-                <AvatarImage src={friend.avatar} />
-                <AvatarFallback>{friend.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-grow">
-                <p className="font-semibold">{friend.name}</p>
-                <p className="text-sm text-muted-foreground">{friend.location}</p>
-                 <p className="text-xs italic text-primary">"{friend.message}"</p>
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-lg text-primary">{friend.time}</p>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
+  return <FriendMap friendPins={friendList} />;
 }

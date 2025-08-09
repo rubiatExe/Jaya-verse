@@ -36,18 +36,30 @@ export interface Letter {
 
 export interface AddLetterData extends Omit<Letter, 'id' | 'createdAt'> {}
 
+const FRIEND_TIMEZONES = {
+    'New York': 'America/New_York',
+    'London': 'Europe/London',
+    'Paris': 'Europe/Paris',
+    'Tokyo': 'Asia/Tokyo',
+    'Sydney': 'Australia/Sydney',
+    'Los Angeles': 'America/Los_Angeles',
+    'New Delhi': 'Asia/Kolkata',
+    'Singapore': 'Asia/Singapore',
+};
+
 export interface Friend {
   id?: string;
   name: string;
   location: string;
   time: string;
+  timeZone: string;
   message: string;
   avatar: string;
   coords: { top: string; left: string };
   createdAt?: Date;
 }
 
-export interface AddFriendData extends Omit<Friend, 'id' | 'time' | 'avatar' | 'coords' | 'createdAt'> {}
+export interface AddFriendData extends Omit<Friend, 'id' | 'time' | 'timeZone' | 'avatar' | 'coords' | 'createdAt'> {}
 
 export interface WaterStatus {
     currentGlasses: number;
@@ -223,9 +235,14 @@ export async function addFriendToDb(newFriend: AddFriendData) {
     const top = `${Math.random() * 60 + 20}%`;
     const left = `${Math.random() * 80 + 10}%`;
 
+    const timeZoneKeys = Object.keys(FRIEND_TIMEZONES);
+    const randomTimeZoneKey = timeZoneKeys[Math.floor(Math.random() * timeZoneKeys.length)];
+    const timeZone = FRIEND_TIMEZONES[randomTimeZoneKey as keyof typeof FRIEND_TIMEZONES];
+
     const friend: Omit<Friend, 'id' | 'createdAt'> = {
         ...newFriend,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'}),
+        timeZone,
         avatar: `https://placehold.co/100x100.png?text=${newFriend.name.charAt(0)}`,
         coords: { top, left },
     }

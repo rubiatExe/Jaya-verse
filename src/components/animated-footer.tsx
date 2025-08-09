@@ -37,6 +37,7 @@ const AnimatedFooter = () => {
           width: 50px;
           height: 50px;
           animation: run 15s linear infinite;
+          transform: rotate(180deg);
         }
 
         @keyframes run {

@@ -4,8 +4,15 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Map, MapPin } from "lucide-react";
-import Image from "next/image";
 import { useFriends, type Friend } from "@/lib/data-store";
+
+// World Map SVG Component
+const WorldMapSVG = () => (
+    <svg viewBox="0 0 1000 500" className="w-full h-full" fill="#a1d2e6" stroke="#fff" strokeWidth="1">
+        <path fill="#90c68a" d="M295 140l-30 20 -20 30 -10 30 10 20 20 30 30 20 40 -10 30 -30 10 -40 -20 -30 -40 -20z M150 300l-20 20 -10 30 10 20 30 10 40 -10 20 -20 -10 -30 -30 -20z M450 120l-20 30 10 40 30 30 40 10 30 -20 10 -40 -20 -30 -40 -20z M600 150l20 20 10 30 20 20 30 0 30 -20 10 -30 -10 -20 -30 0 -30 20z M750 250l20 20 10 30 20 20 30 0 30 -20 10 -30 -10 -20 -30 0 -30 20z M500 300l-20 20 -10 30 10 20 30 10 40 -10 20 -20 -10 -30 -30 -20z M800 350l20 20 10 30 20 20 30 0 30 -20 10 -30 -10 -20 -30 0 -30 20z" />
+    </svg>
+);
+
 
 // Global Friends Widget Component
 const GlobalFriendsWidget = ({ friendPins }: { friendPins: Friend[] }) => {
@@ -73,7 +80,7 @@ const FriendMap = ({ friendPins }: { friendPins: Friend[] }) => {
                 </CardHeader>
                 <CardContent>
                     <div className="relative w-full max-w-4xl mx-auto aspect-video bg-blue-200 rounded-lg overflow-hidden border-2 border-primary/20">
-                        <Image src="https://placehold.co/1200x600/FDE2F3/d05e94.png" alt="A World of Love for Jaya" layout="fill" objectFit="cover" data-ai-hint="pink world map"/>
+                        <WorldMapSVG />
                         {friendPins.map((pin) => (
                             <div key={pin.id} className="absolute" style={{ left: pin.coords.left, top: pin.coords.top }} onMouseEnter={() => setActivePin(pin)} onMouseLeave={() => setActivePin(null)}>
                                 <div className="animate-bounce transform -translate-x-1/2 -translate-y-full">

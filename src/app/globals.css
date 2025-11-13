@@ -132,4 +132,70 @@
       opacity: 0;
     }
   }
+  
+  .scene {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .butterfly {
+    position: absolute;
+    bottom: 20px;
+    width: 20px;
+    height: 20px;
+    animation: fly 15s linear infinite;
+  }
+
+  .dog {
+    position: absolute;
+    bottom: 0px;
+    width: 50px;
+    height: 50px;
+    animation: run 15s linear infinite;
+  }
+
+  @keyframes run {
+    0% {
+      left: -50px;
+      transform: translateY(0);
+    }
+    25% {
+      transform: translateY(-5px);
+    }
+    50% {
+      left: 50%;
+      transform: translateY(0);
+    }
+    75% {
+      transform: translateY(-5px);
+    }
+    100% {
+      left: calc(100% + 50px);
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fly {
+    0% {
+      left: -20px;
+      transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-20px) rotate(15deg);
+    }
+    50% {
+      left: 55%;
+      transform: translateY(0) rotate(-15deg);
+    }
+    75% {
+      transform: translateY(-20px) rotate(10deg);
+    }
+    100% {
+      left: calc(100% + 20px);
+      transform: translateY(0) rotate(0deg);
+    }
+  }
 }
